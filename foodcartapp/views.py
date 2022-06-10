@@ -3,7 +3,8 @@ from django.templatetags.static import static
 import json
 
 from .models import Product, Order, OrderItem
-
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
 def banners_list_api(request):
     # FIXME move data to db?
@@ -57,9 +58,9 @@ def product_list_api(request):
     })
 
 
+@api_view(['POST'])
 def register_order(request):
-    response = json.loads(request.body.decode())
-    print(response)
+    response = request.data
     order = Order.objects.create(
         address=response.get('address'),
         name=response.get('firstname'),
@@ -74,4 +75,4 @@ def register_order(request):
             product=products.get(id=item.get('product'))
         )
     print(response)
-    return JsonResponse(response)
+    return Response(response)
