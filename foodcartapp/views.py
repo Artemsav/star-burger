@@ -7,6 +7,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 
+
 def banners_list_api(request):
     # FIXME move data to db?
     return JsonResponse([
