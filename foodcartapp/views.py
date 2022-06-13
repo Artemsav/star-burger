@@ -91,8 +91,6 @@ class OrderSerializer(ModelSerializer):
             'phonenumber',
             'products'
             ]
-        #write_only_fields = ('products',)
-        #extra_kwargs = {'products': True, }
 
 
 @api_view(['POST'])
