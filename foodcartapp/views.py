@@ -5,7 +5,8 @@ from .models import Product, Order, OrderItem
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.serializers import ModelSerializer, ListField
+from rest_framework import serializers
+from rest_framework.serializers import ModelSerializer
 from rest_framework.serializers import ValidationError
 
 def banners_list_api(request):
@@ -72,8 +73,8 @@ class OrderItemSerializer(ModelSerializer):
 
 
 class OrderSerializer(ModelSerializer):
-    products = OrderItemSerializer(many=True)
-  
+    products = OrderItemSerializer(many=True, write_only=True)
+
     def validate_products(self, value):
         if isinstance(value, list):
             if len(value) > 0:
@@ -90,13 +91,14 @@ class OrderSerializer(ModelSerializer):
             'phonenumber',
             'products'
             ]
+        #write_only_fields = ('products',)
+        #extra_kwargs = {'products': True, }
 
 
 @api_view(['POST'])
 def register_order(request):
     serializer = OrderSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    response = request.data
     order = Order.objects.create(
             address=serializer.validated_data['address'],
             firstname=serializer.validated_data['firstname'],
@@ -106,4 +108,6 @@ def register_order(request):
     order_item_fields = serializer.validated_data['products']
     items = [OrderItem(order=order, **fields) for fields in order_item_fields]
     OrderItem.objects.bulk_create(items)
-    return Response(response, status=status.HTTP_200_OK)
+    if serializer.is_valid:
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    return JsonResponse(serializer.errors, status=400)
