@@ -129,22 +129,22 @@ class Order(models.Model):
         'адрес',
         max_length=100
     )
-    name = models.CharField(
+    firstname = models.CharField(
         'Имя',
         max_length=50
     )
-    surname = models.CharField(
+    lastname = models.CharField(
         'Фамилия',
         max_length=50
     )
-    phone_number = PhoneNumberField()    
+    phonenumber = PhoneNumberField(region='RU')
 
     class Meta:
         verbose_name = 'заказ'
         verbose_name_plural = 'заказы'
 
     def __str__(self):
-        return f'{self.name} {self.surname} {self.address}'
+        return f'{self.firstname} {self.lastname} {self.address}'
 
 
 class OrderItem(models.Model):
@@ -157,7 +157,7 @@ class OrderItem(models.Model):
     order = models.ForeignKey(
         Order,
         on_delete=models.CASCADE,
-        related_name='order_item',
+        related_name='products',
         verbose_name='Заказ'
     )
     quantity = models.IntegerField('количество')

@@ -1,12 +1,12 @@
 from django.http import JsonResponse
 from django.templatetags.static import static
-import json
 
 from .models import Product, Order, OrderItem
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-
+from rest_framework.serializers import ModelSerializer, ListField
+from rest_framework.serializers import ValidationError
 
 def banners_list_api(request):
     # FIXME move data to db?
@@ -60,29 +60,50 @@ def product_list_api(request):
     })
 
 
+class OrderItemSerializer(ModelSerializer):
+
+    class Meta:
+        model = OrderItem
+        allow_empty = False
+        fields = [
+            'quantity',
+            'product',
+        ]
+
+
+class OrderSerializer(ModelSerializer):
+    products = OrderItemSerializer(many=True)
+  
+    def validate_products(self, value):
+        if isinstance(value, list):
+            if len(value) > 0:
+                return value
+        raise ValidationError('Products key not presented or not list')
+
+    class Meta:
+        model = Order
+        allow_empty = False
+        fields = [
+            'address',
+            'firstname',
+            'lastname',
+            'phonenumber',
+            'products'
+            ]
+
+
 @api_view(['POST'])
 def register_order(request):
+    serializer = OrderSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
     response = request.data
-    if isinstance(response.get('products'), list):
-        if len(response.get('products')) > 0:
-            order = Order.objects.create(
-                address=response.get('address'),
-                name=response.get('firstname'),
-                surname=response.get('lastname'),
-                phone_number=response.get('phonenumber')
-                )
-            products = Product.objects.all()
-            for item in response.get('products'):
-                OrderItem.objects.create(
-                    order=order,
-                    quantity=item.get('quantity'),
-                    product=products.get(id=item.get('product'))
-                )
-            print(response)
-            return Response(response)
-        else:
-            content = {'data Erorr': 'products key not presented or not list'}
-            return Response(content, status=status.HTTP_200_OK)
-    else:
-        content = {'data Erorr': 'products key not presented or not list'}
-        return Response(content, status=status.HTTP_200_OK)
+    order = Order.objects.create(
+            address=serializer.validated_data['address'],
+            firstname=serializer.validated_data['firstname'],
+            lastname=serializer.validated_data['lastname'],
+            phonenumber=serializer.validated_data['phonenumber']
+            )
+    order_item_fields = serializer.validated_data['products']
+    items = [OrderItem(order=order, **fields) for fields in order_item_fields]
+    OrderItem.objects.bulk_create(items)
+    return Response(response, status=status.HTTP_200_OK)
