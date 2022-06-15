@@ -1,8 +1,8 @@
 from django.db import models
 from django.core.validators import MinValueValidator
 from phonenumber_field.modelfields import PhoneNumberField
-
-
+from django.db.models import F
+from django.db.models import Sum
 class Restaurant(models.Model):
     name = models.CharField(
         'название',
@@ -124,6 +124,23 @@ class RestaurantMenuItem(models.Model):
         return f"{self.restaurant.name} - {self.product.name}"
 
 
+class OrderQuerySet(models.QuerySet):
+    def count_order_price(self):
+        #self.annotate(item_price=F('products__quantity')*F('products__product__price'))
+        order_items = OrderItem.objects.annotate(item_price=F('quantity')*F('product__price'))
+        for order in self:
+            price = 0
+            for item in order_items.filter(order=order):
+                price += int(item.item_price)
+            order.price = price
+        return self
+
+
+class OrderItemQuerySet(models.QuerySet):
+    def count_order_item_price(self):
+        pass
+
+
 class Order(models.Model):
     address = models.CharField(
         'адрес',
@@ -138,6 +155,8 @@ class Order(models.Model):
         max_length=50
     )
     phonenumber = PhoneNumberField(region='RU')
+
+    objects = OrderQuerySet.as_manager()
 
     class Meta:
         verbose_name = 'заказ'
@@ -157,10 +176,12 @@ class OrderItem(models.Model):
     order = models.ForeignKey(
         Order,
         on_delete=models.CASCADE,
-        related_name='products',
+        related_name='products',  # fix naming
         verbose_name='Заказ'
     )
     quantity = models.IntegerField('количество')
+
+    objects = OrderItemQuerySet.as_manager()
 
     class Meta:
         verbose_name = 'пункт меню заказа'
@@ -168,6 +189,3 @@ class OrderItem(models.Model):
         unique_together = [
             ['product', 'order']
         ]
-
-    def __str__(self):
-        return f"{self.product.name} - {self.order.name}"
