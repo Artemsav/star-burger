@@ -126,11 +126,10 @@ class RestaurantMenuItem(models.Model):
 
 class OrderQuerySet(models.QuerySet):
     def count_order_price(self):
-        #self.annotate(item_price=F('products__quantity')*F('products__product__price'))
-        order_items = OrderItem.objects.annotate(item_price=F('quantity')*F('product__price'))
+        order_items = self.annotate(item_price=F('order_items__quantity')*F('order_items__product__price'))
         for order in self:
             price = 0
-            for item in order_items.filter(order=order):
+            for item in order_items.filter(id=order.id):
                 price += int(item.item_price)
             order.price = price
         return self
@@ -176,7 +175,7 @@ class OrderItem(models.Model):
     order = models.ForeignKey(
         Order,
         on_delete=models.CASCADE,
-        related_name='products',  # fix naming
+        related_name='order_items',
         verbose_name='Заказ'
     )
     quantity = models.IntegerField('количество')
@@ -189,3 +188,6 @@ class OrderItem(models.Model):
         unique_together = [
             ['product', 'order']
         ]
+
+    def __str__(self):
+        return f'{self.product.name} {self.quantity}'
