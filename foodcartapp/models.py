@@ -171,7 +171,7 @@ class OrderItem(models.Model):
     )
     quantity = models.IntegerField('количество')
 
-    #price = models.DecimalField('Цена позиции', max_digits=8, decimal_places=2)
+    price = models.DecimalField('Цена позиции', max_digits=8, decimal_places=2, validators=[MinValueValidator(0)])
 
     class Meta:
         verbose_name = 'пункт меню заказа'
