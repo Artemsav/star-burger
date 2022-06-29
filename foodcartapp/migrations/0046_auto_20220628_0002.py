@@ -2,16 +2,15 @@
 
 from django.db import migrations
 
+
 def calculate_order_item_price(apps, schema_editor):
     OrderItem = apps.get_model("foodcartapp", "OrderItem")
     db_alias = schema_editor.connection.alias
     order_items = OrderItem.objects.using(db_alias).all()
-    print(order_items)
     for item in order_items:
         price = item.quantity * item.product.price
         item.price = price
-        print(price)
-        print(item.price)
+        item.save()
 
 
 class Migration(migrations.Migration):
