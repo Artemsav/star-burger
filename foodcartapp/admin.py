@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.shortcuts import reverse
 from django.templatetags.static import static
 from django.utils.html import format_html
-
+from typing import Any
 from .models import Product
 from .models import ProductCategory
 from .models import Restaurant
@@ -125,3 +125,12 @@ class OrderAdmin(admin.ModelAdmin):
     inlines = [
         OrderItemInline
     ]
+
+    def save_formset(self, request: Any, form: Any, formset: Any, change: Any) -> None:
+        instances = formset.save(commit=False)
+        for instance in instances:
+            print(instance)
+            instance.price = instance.quantity * instance.product.price
+            print(instance.price)
+            instance.save()
+        formset.save_m2m()
