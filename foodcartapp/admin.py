@@ -1,8 +1,11 @@
 from django.contrib import admin
+from django.http import HttpResponseRedirect
 from django.shortcuts import reverse
 from django.templatetags.static import static
 from django.utils.html import format_html
 from typing import Any
+from django.utils.http import url_has_allowed_host_and_scheme
+from django.utils.encoding import uri_to_iri
 from .models import Product
 from .models import ProductCategory
 from .models import Restaurant
@@ -125,6 +128,16 @@ class OrderAdmin(admin.ModelAdmin):
     inlines = [
         OrderItemInline
     ]
+
+    def response_post_save_change(self, request, obj):
+        res = super().response_post_save_change(request, obj)
+        if 'next' in request.GET:
+            if url_has_allowed_host_and_scheme(request.GET['next'], None):
+                url = uri_to_iri(request.GET['next'])
+                return HttpResponseRedirect(url)
+        else:
+            return res
+
 
     def save_formset(self, request: Any, form: Any, formset: Any, change: Any) -> None:
         instances = formset.save(commit=False)
