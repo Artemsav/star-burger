@@ -146,6 +146,27 @@ class Order(models.Model):
     )
     phonenumber = PhoneNumberField(region='RU')
 
+    MANAGER = 'MN'
+
+    RESTAURANT = 'REST'
+
+    COURIER = 'CR'
+
+    FINISHED = 'FN'
+
+    STATUS_CHOICES = [
+        (MANAGER, 'Необработано'),
+        (RESTAURANT, 'В ресторане'),
+        (COURIER, 'В доставке'),
+        (FINISHED, 'Закрыт')
+    ]
+
+    status = models.CharField(
+        max_length=4,
+        choices=STATUS_CHOICES,
+        default=MANAGER
+    )
+
     objects = OrderQuerySet.as_manager()
 
     class Meta:
