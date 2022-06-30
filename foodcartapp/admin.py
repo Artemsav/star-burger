@@ -109,11 +109,6 @@ class ProductAdmin(admin.ModelAdmin):
     get_image_list_preview.short_description = 'превью'
 
 
-@admin.register(ProductCategory)
-class ProductAdmin(admin.ModelAdmin):
-    pass
-
-
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
 
