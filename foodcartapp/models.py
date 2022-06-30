@@ -167,6 +167,13 @@ class Order(models.Model):
         default=MANAGER
     )
 
+    comment = models.TextField(
+        'Комментарий к заказу',
+        max_length=200,
+        blank=True,
+        null=True
+    )
+
     objects = OrderQuerySet.as_manager()
 
     class Meta:
