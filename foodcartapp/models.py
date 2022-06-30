@@ -185,6 +185,22 @@ class Order(models.Model):
 
     delivered_at = models.DateTimeField('Доставлено', blank=True, null=True)
 
+    ELECTRON_PAY = 'EP'
+
+    CASH_PAY = 'CP'
+
+    PAY_CHOICES = [
+        (ELECTRON_PAY, 'Электронный платеж'),
+        (CASH_PAY, 'Наличными'),
+    ]
+
+    pay_method = models.CharField(
+        max_length=2,
+        choices=PAY_CHOICES,
+        default=CASH_PAY,
+        db_index=True
+    )
+
     objects = OrderQuerySet.as_manager()
 
     class Meta:
