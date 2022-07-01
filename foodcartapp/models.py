@@ -99,8 +99,8 @@ class Product(models.Model):
 class RestaurantMenuItem(models.Model):
     restaurant = models.ForeignKey(
         Restaurant,
-        related_name='menu_items',
-        verbose_name="ресторан",
+        related_name='rest_items',
+        verbose_name='ресторан',
         on_delete=models.CASCADE,
     )
     product = models.ForeignKey(
