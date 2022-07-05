@@ -10,11 +10,31 @@ from django.contrib.auth import views as auth_views
 from django.db.models import Prefetch
 from foodcartapp.models import OrderItem, Product, Restaurant, Order, RestaurantMenuItem
 from django.template.defaulttags import register
+import requests
+from geopy import distance
 
 
 @register.filter
 def get_item(dictionary, key):
     return dictionary.get(key)
+
+
+def fetch_coordinates(apikey, address):
+    base_url = "https://geocode-maps.yandex.ru/1.x"
+    response = requests.get(base_url, params={
+        "geocode": address,
+        "apikey": apikey,
+        "format": "json",
+    })
+    response.raise_for_status()
+    found_places = response.json()['response']['GeoObjectCollection']['featureMember']
+
+    if not found_places:
+        return None
+
+    most_relevant = found_places[0]
+    lon, lat = most_relevant['GeoObject']['Point']['pos'].split(" ")
+    return lon, lat
 
 
 class Login(forms.Form):
@@ -106,7 +126,7 @@ def view_orders(request):
     orders = Order.objects.count_order_price()
     rest_items = RestaurantMenuItem.objects.all().select_related('restaurant').select_related('product')
     orders_rests = {}
-
+    order_distance = {}
     for order in orders:
         restorans = []
         item_with_products = order.order_items.all()
@@ -115,9 +135,10 @@ def view_orders(request):
             restoran_menu_item = rest_items.filter(product__id=product_id).filter(availability=True)
             restorans.append([rest.restaurant.name for rest in restoran_menu_item])
         order_result = set(restorans[0]).intersection(*restorans)
-        orders_rests[order.id]=order_result
-
+        orders_rests[order.id] = order_result
+        order_distance[order.id] = [rest_items.filter(restaurant__name=rest_name)[0].address for rest_name in order_result]
     return render(request, template_name='order_items.html', context={
         'order_items': orders,
-        'order_restaurant': orders_rests
+        'order_restaurant': orders_rests,
+        'order_distance': order_distance
     })

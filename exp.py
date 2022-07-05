@@ -1,5 +1,6 @@
 from foodcartapp.models import OrderItem, Product, Restaurant, Order, RestaurantMenuItem
-orders_rest = {}
+orders_rests = {}
+order_distance = {}
 orders = Order.objects.count_order_price()
 rest_items = RestaurantMenuItem.objects.all().select_related('restaurant').select_related('product')
 for order in orders:
@@ -15,4 +16,5 @@ for order in orders:
     print('==========order results===========')
     order_result = set(restorans[0]).intersection(*restorans)
     print(order_result)
-    orders_rest[order.id]=order_result
+    orders_rests[order.id] = order_result
+    order_distance[order.id] = [rest_items.restaurant.filter(name=rest_name)[0].address for rest_name in order_result]
