@@ -9,6 +9,12 @@ from django.contrib.auth import views as auth_views
 
 from django.db.models import Prefetch
 from foodcartapp.models import OrderItem, Product, Restaurant, Order, RestaurantMenuItem
+from django.template.defaulttags import register
+
+
+@register.filter
+def get_item(dictionary, key):
+    return dictionary.get(key)
 
 
 class Login(forms.Form):
@@ -97,8 +103,21 @@ def view_restaurants(request):
 
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
-    order_items = Order.objects.count_order_price()
+    orders = Order.objects.count_order_price()
     rest_items = RestaurantMenuItem.objects.all().select_related('restaurant').select_related('product')
+    orders_rests = {}
+
+    for order in orders:
+        restorans = []
+        item_with_products = order.order_items.all()
+        for order_item in item_with_products:
+            product_id = order_item.product.id
+            restoran_menu_item = rest_items.filter(product__id=product_id).filter(availability=True)
+            restorans.append([rest.restaurant.name for rest in restoran_menu_item])
+        order_result = set(restorans[0]).intersection(*restorans)
+        orders_rests[order.id]=order_result
+
     return render(request, template_name='order_items.html', context={
-        'order_items': order_items
+        'order_items': orders,
+        'order_restaurant': orders_rests
     })

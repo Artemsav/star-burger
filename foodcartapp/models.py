@@ -201,6 +201,15 @@ class Order(models.Model):
         db_index=True
     )
 
+    restaurant = models.ForeignKey(
+        Restaurant,
+        related_name='orders',
+        verbose_name='ресторан',
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True
+    )
+
     objects = OrderQuerySet.as_manager()
 
     class Meta:
@@ -210,6 +219,12 @@ class Order(models.Model):
     def __str__(self):
         return f'{self.firstname} {self.lastname} {self.address}'
 
+    def save(self, *args, **kargs):
+        if self.restaurant is None:
+            self.status = self.MANAGER
+        else:
+            self.status = self.RESTAURANT
+        super(Order, self).save(*args, **kargs)
 
 class OrderItem(models.Model):
     product = models.ForeignKey(
