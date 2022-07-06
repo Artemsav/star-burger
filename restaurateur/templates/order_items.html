@@ -46,8 +46,8 @@
         <td>Может быть приготовленно в:
           <details>
         <summary> Подробнее</summary>
-        {%for rests in order_restaurant|get_item:item.id %}
-        <p>{{rests}}</p>
+        {%for rests, distance in order_restaurant|get_item:item.id %}
+        <p>{{rests}}: {{distance|floatformat:3}} км</p>
         {% endfor %}</details></td>
         {% endif %}
         <td><a href="{% url 'admin:foodcartapp_order_change' object_id=item.id %}?next={{request.get_full_path|urlencode}}"> Редактирование заказа </a></td>
