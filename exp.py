@@ -37,17 +37,19 @@ rest_items = RestaurantMenuItem.objects.all().select_related('restaurant').selec
 address_coordinates = AddressCoordinates.objects.all()
 for order in orders:
     restorans = []
-    print(f'======{order}======')
+    print(f'==This is order===={order}======')
     item_with_products = order.order_items.all()
-    print(f'======{item_with_products}======')
-    for order_item in item_with_products:
-        product_id = order_item.product.id
-        restoran_menu_item = rest_items.filter(product__id=product_id).filter(availability=True)
-        restorans.append([rest.restaurant for rest in restoran_menu_item])
-    print(f'========>{restorans}')
+    print(f'==This is order items===={item_with_products}======')
+    restoran_menu_item = rest_items.filter(product__id__in=item_with_products,availability=True).select_related('product')
+    print(f'==This is restoran_menu_item===={restoran_menu_item}======')
+    for restaurant in restoran_menu_item:
+        for item in item_with_products:
+            if item.product == restaurant.product:
+                restorans.append(restaurant.restaurant)
+    print(f'===This is resrourant list=====>{restorans}')
     print('==========order results===========')
     order_result = set(restorans[0]).intersection(*restorans)
-    print(f'=========={order_result}===========')
+    print(f'===Order results(intersections)======={order_result}===========')
     print(order.address)
     order_address = order.address
     if not address_coordinates.filter(address=order_address):
@@ -70,5 +72,6 @@ for order in orders:
                 )
             except ValueError:
                 None
-    orders_rests[order.id] = sorted([(rest.name, get_distance((address_coordinates.filter(address=order.address)[0].lat,address_coordinates.filter(address=order.address)[0].lon,), fetch_coordinates(apikey, order.address))) for rest in order_result], key= lambda rest:rest[1])
-    print('________________',orders_rests)
+    
+    orders_rests[order.id] = sorted([(rest.name, get_distance((address_coordinates.filter(address=rest.address)[0].lat, address_coordinates.filter(address=rest.address)[0].lon), (address_coordinates.filter(address=order.address)[0].lat, address_coordinates.filter(address=order.address)[0].lon))) for rest in order_result], key= lambda rest:rest[1])
+    print('+++++++++++Result dict to request++++++++++++++',orders_rests)

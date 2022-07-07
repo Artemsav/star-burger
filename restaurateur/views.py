@@ -8,7 +8,8 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth import views as auth_views
 
 from django.db.models import Prefetch
-from foodcartapp.models import OrderItem, Product, Restaurant, Order, RestaurantMenuItem
+from foodcartapp.models import Product, Restaurant, Order, RestaurantMenuItem
+from geoapp.models import AddressCoordinates
 from django.template.defaulttags import register
 import requests
 from geopy import distance
@@ -131,27 +132,55 @@ def view_orders(request):
     apikey = settings.YANDEX_GEO
     orders = Order.objects.count_order_price()
     rest_items = RestaurantMenuItem.objects.all().select_related('restaurant').select_related('product')
+    address_coordinates = AddressCoordinates.objects.all()
     orders_rests = {}
     for order in orders:
         restorans = []
         item_with_products = order.order_items.all()
         for order_item in item_with_products:
             product_id = order_item.product.id
-            restoran_menu_item = rest_items.filter(product__id=product_id).filter(availability=True)
+            restoran_menu_item = rest_items.filter(product__id=product_id, availability=True)
             restorans.append([rest.restaurant for rest in restoran_menu_item])
         order_result = set(restorans[0]).intersection(*restorans)
+        order_address = order.address
+        if not address_coordinates.get(address=order_address):
+            order_lat, order_lon = fetch_coordinates(apikey, order_address)
+            address_coordinates.create(
+                address=order_address,
+                lat=order_lat,
+                lon=order_lon
+            )
+        for rest in order_result:
+            rest_address = rest.address
+            if not address_coordinates.get(address=rest_address):
+                try:
+                    rest_lat, rest_lon = fetch_coordinates(apikey, rest_address)
+                    address_coordinates.create(
+                        address=rest_address,
+                        lat=rest_lat,
+                        lon=rest_lon
+                    )
+                except ValueError:
+                    None
+
         orders_rests[order.id] = sorted(
             [
                 (
                     rest.name, get_distance(
-                        fetch_coordinates(apikey, rest.address),
-                        fetch_coordinates(apikey, order.address)
+                        (
+                            address_coordinates.get(address=rest.address).lat,
+                            address_coordinates.get(address=rest.address).lon
+                            ),
+                        (
+                            address_coordinates.get(address=order.address).lat,
+                            address_coordinates.get(address=order.address).lon
+                            )
                         )
                     ) for rest in order_result
-            ],
-            key=lambda rest: rest[1]
-        )
+                ],
+                key=lambda rest: rest[1]
+            )
     return render(request, template_name='order_items.html', context={
-        'order_items': orders,
-        'order_restaurant': orders_rests,
+        'orders': orders,
+        'order_restaurants': orders_rests,
     })

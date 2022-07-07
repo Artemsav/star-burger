@@ -25,32 +25,32 @@
       <th>Ссылка на админку</th>
     </tr>
 
-    {% for item in order_items %}
-    {% if item.status != 'FN' %}
+    {% for order in orders %}
+    {% if order.status != 'FN' %}
       <tr>
-        <td>{{item.id}}</td>
-        <td>{{item.get_status_display}}</td>
-        <td>{{item.get_pay_method_display}}</td>
-        <td>{{item.item_price}} руб</td>
-        <td>{{item.firstname}} {{item.lastname}}</td>
-        <td>{{item.phonenumber}}</td>
-        <td>{{item.address}}</td>
-        {% if item.comment%}
-        <td>{{item.comment}}</td>
+        <td>{{order.id}}</td>
+        <td>{{order.get_status_display}}</td>
+        <td>{{order.get_pay_method_display}}</td>
+        <td>{{order.item_price}} руб</td>
+        <td>{{order.firstname}} {{order.lastname}}</td>
+        <td>{{order.phonenumber}}</td>
+        <td>{{order.address}}</td>
+        {% if order.comment%}
+        <td>{{order.comment}}</td>
         {% else%}
         <td></td>
         {% endif %}
-        {% if item.restaurant%}
-        <td>Готовиться в {{item.restaurant}}</td>
+        {% if order.restaurant%}
+        <td>Готовиться в {{order.restaurant}}</td>
         {% else%}
         <td>Может быть приготовленно в:
           <details>
         <summary> Подробнее</summary>
-        {%for rests, distance in order_restaurant|get_item:item.id %}
+        {%for rests, distance in order_restaurants|get_item:order.id %}
         <p>{{rests}}: {{distance|floatformat:3}} км</p>
         {% endfor %}</details></td>
         {% endif %}
-        <td><a href="{% url 'admin:foodcartapp_order_change' object_id=item.id %}?next={{request.get_full_path|urlencode}}"> Редактирование заказа </a></td>
+        <td><a href="{% url 'admin:foodcartapp_order_change' object_id=order.id %}?next={{request.get_full_path|urlencode}}"> Редактирование заказа </a></td>
       </tr>
     {% endif %}
     {% endfor %}
