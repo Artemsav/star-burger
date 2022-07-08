@@ -130,56 +130,76 @@ def view_restaurants(request):
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
     apikey = settings.YANDEX_GEO
-    orders = Order.objects.count_order_price()
-    rest_items = RestaurantMenuItem.objects.all().select_related('restaurant').select_related('product')
-    address_coordinates = AddressCoordinates.objects.all()
     orders_rests = {}
+    saved_addresses = []
+    orders = list(Order.objects.prefetch_related('order_items__product').count_order_price())
+    rest_items = list(RestaurantMenuItem.objects.select_related('product') \
+                    .select_related('restaurant').filter(availability=True))
+    address_coordinates = AddressCoordinates.objects.all()
+    for addresses in address_coordinates:
+        saved_addresses.append(addresses.address)
+    for restaurant in rest_items:
+        restaurant_address = restaurant.restaurant.address
+        if not set([restaurant_address]).issubset(saved_addresses):
+            rest_lat, rest_lon = fetch_coordinates(apikey, restaurant_address)
+            address_coordinates.create(
+                address=restaurant_address,
+                lat=rest_lat,
+                lon=rest_lon
+                )
     for order in orders:
-        restorans = []
         item_with_products = order.order_items.all()
-        for order_item in item_with_products:
-            product_id = order_item.product.id
-            restoran_menu_item = rest_items.filter(product__id=product_id, availability=True)
-            restorans.append([rest.restaurant for rest in restoran_menu_item])
-        order_result = set(restorans[0]).intersection(*restorans)
+        product_restourant = []
+        for item in item_with_products:
+            product_restourant.append(
+                [
+                    rest.restaurant for rest in rest_items if rest.product.name==item.product.name
+                    ]
+                )
+        order_result = set(product_restourant[0]).intersection(*product_restourant)
         order_address = order.address
-        if not address_coordinates.get(address=order_address):
+        if set([order_address]).issubset(saved_addresses):
+            orders_rests[order.id] = sorted(
+                [
+                    (
+                        rest.name,
+                        get_distance(
+                            (
+                                address_coordinates.filter(address=rest.address)[0].lat,
+                                address_coordinates.filter(address=rest.address)[0].lon
+                                ),
+                            (
+                                address_coordinates.filter(address=order.address)[0].lat,
+                                address_coordinates.filter(address=order.address)[0].lon
+                                )
+                            )
+                        ) for rest in order_result
+                    ], key=lambda rest: rest[1]
+                )
+        else:
             order_lat, order_lon = fetch_coordinates(apikey, order_address)
             address_coordinates.create(
                 address=order_address,
                 lat=order_lat,
                 lon=order_lon
             )
-        for rest in order_result:
-            rest_address = rest.address
-            if not address_coordinates.get(address=rest_address):
-                try:
-                    rest_lat, rest_lon = fetch_coordinates(apikey, rest_address)
-                    address_coordinates.create(
-                        address=rest_address,
-                        lat=rest_lat,
-                        lon=rest_lon
-                    )
-                except ValueError:
-                    None
-
-        orders_rests[order.id] = sorted(
-            [
-                (
-                    rest.name, get_distance(
-                        (
-                            address_coordinates.get(address=rest.address).lat,
-                            address_coordinates.get(address=rest.address).lon
-                            ),
-                        (
-                            address_coordinates.get(address=order.address).lat,
-                            address_coordinates.get(address=order.address).lon
+            orders_rests[order.id] = sorted(
+                [
+                    (
+                        rest.name,
+                        get_distance(
+                            (
+                                address_coordinates.filter(address=rest.address)[0].lat,
+                                address_coordinates.filter(address=rest.address)[0].lon
+                                ),
+                            (
+                                order_lat,
+                                order_lon
+                                )
                             )
-                        )
-                    ) for rest in order_result
-                ],
-                key=lambda rest: rest[1]
-            )
+                        ) for rest in order_result
+                    ], key=lambda rest: rest[1]
+                )
     return render(request, template_name='order_items.html', context={
         'orders': orders,
         'order_restaurants': orders_rests,
