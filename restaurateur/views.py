@@ -1,19 +1,17 @@
+import requests
 from django import forms
-from django.shortcuts import redirect, render
-from django.views import View
-from django.urls import reverse_lazy
-from django.contrib.auth.decorators import user_passes_test
-
+from django.conf import settings
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import views as auth_views
-
-from django.db.models import Prefetch
-from foodcartapp.models import Product, Restaurant, Order, RestaurantMenuItem
-from geoapp.models import AddressCoordinates
+from django.contrib.auth.decorators import user_passes_test
+from django.shortcuts import redirect, render
 from django.template.defaulttags import register
-import requests
+from django.urls import reverse_lazy
+from django.views import View
 from geopy import distance
-from django.conf import settings
+
+from foodcartapp.models import Order, Product, Restaurant, RestaurantMenuItem
+from geoapp.models import AddressCoordinates
 
 
 @register.filter
@@ -131,13 +129,13 @@ def view_restaurants(request):
 def view_orders(request):
     apikey = settings.YANDEX_GEO
     orders_rests = {}
-    saved_addresses = []
+    saved_addresses = {}
     orders = list(Order.objects.prefetch_related('order_items__product').count_order_price())
     rest_items = list(RestaurantMenuItem.objects.select_related('product') \
                     .select_related('restaurant').filter(availability=True))
     address_coordinates = AddressCoordinates.objects.all()
     for addresses in address_coordinates:
-        saved_addresses.append(addresses.address)
+        saved_addresses[addresses.address]=(addresses.lon, addresses.lat)
     for restaurant in rest_items:
         restaurant_address = restaurant.restaurant.address
         if not set([restaurant_address]).issubset(saved_addresses):
@@ -153,24 +151,24 @@ def view_orders(request):
         for item in item_with_products:
             product_restourant.append(
                 [
-                    rest.restaurant for rest in rest_items if rest.product.name==item.product.name
+                    rest.restaurant for rest in rest_items if rest.product.name == item.product.name
                     ]
                 )
         order_result = set(product_restourant[0]).intersection(*product_restourant)
         order_address = order.address
-        if set([order_address]).issubset(saved_addresses):
+        if set([order_address]).issubset(saved_addresses.keys()):
             orders_rests[order.id] = sorted(
                 [
                     (
                         rest.name,
                         get_distance(
                             (
-                                address_coordinates.filter(address=rest.address)[0].lat,
-                                address_coordinates.filter(address=rest.address)[0].lon
+                                saved_addresses.get(rest.address)[0],
+                                saved_addresses.get(rest.address)[1]
                                 ),
                             (
-                                address_coordinates.filter(address=order.address)[0].lat,
-                                address_coordinates.filter(address=order.address)[0].lon
+                                saved_addresses.get(order.address)[0],
+                                saved_addresses.get(order.address)[1]
                                 )
                             )
                         ) for rest in order_result
@@ -189,8 +187,8 @@ def view_orders(request):
                         rest.name,
                         get_distance(
                             (
-                                address_coordinates.filter(address=rest.address)[0].lat,
-                                address_coordinates.filter(address=rest.address)[0].lon
+                                saved_addresses.get(rest.address)[0],
+                                saved_addresses.get(rest.address)[1]
                                 ),
                             (
                                 order_lat,
