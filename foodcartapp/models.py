@@ -183,7 +183,6 @@ class Order(models.Model):
     pay_method = models.CharField(
         max_length=2,
         choices=PAY_CHOICES,
-        default=CASH_PAY,
         db_index=True
     )
     restaurant = models.ForeignKey(
