@@ -85,7 +85,6 @@ class Product(models.Model):
         max_length=200,
         blank=True,
     )
-
     objects = ProductQuerySet.as_manager()
 
     class Meta:
@@ -133,6 +132,22 @@ class OrderQuerySet(models.QuerySet):
 
 
 class Order(models.Model):
+    ELECTRON_PAY = 'EP'
+    CASH_PAY = 'CP'
+    PAY_CHOICES = [
+        (ELECTRON_PAY, 'Электронный платеж'),
+        (CASH_PAY, 'Наличными'),
+    ]
+    MANAGER = 'MN'
+    RESTAURANT = 'REST'
+    COURIER = 'CR'
+    FINISHED = 'FN'
+    STATUS_CHOICES = [
+        (MANAGER, 'Необработано'),
+        (RESTAURANT, 'В ресторане'),
+        (COURIER, 'В доставке'),
+        (FINISHED, 'Закрыт')
+    ]
     address = models.CharField(
         'адрес',
         max_length=100
@@ -146,61 +161,30 @@ class Order(models.Model):
         max_length=50
     )
     phonenumber = PhoneNumberField(region='RU')
-
-    MANAGER = 'MN'
-
-    RESTAURANT = 'REST'
-
-    COURIER = 'CR'
-
-    FINISHED = 'FN'
-
-    STATUS_CHOICES = [
-        (MANAGER, 'Необработано'),
-        (RESTAURANT, 'В ресторане'),
-        (COURIER, 'В доставке'),
-        (FINISHED, 'Закрыт')
-    ]
-
     status = models.CharField(
         max_length=4,
         choices=STATUS_CHOICES,
         default=MANAGER
     )
-
     comment = models.TextField(
         'Комментарий к заказу',
         max_length=200,
         blank=True,
         null=True
     )
-
     registered_at = models.DateTimeField(
         'Зарегистрирован',
         default=timezone.now,
         db_index=True
         )
-
     called_at = models.DateTimeField('Звонок', blank=True, null=True)
-
     delivered_at = models.DateTimeField('Доставлено', blank=True, null=True)
-
-    ELECTRON_PAY = 'EP'
-
-    CASH_PAY = 'CP'
-
-    PAY_CHOICES = [
-        (ELECTRON_PAY, 'Электронный платеж'),
-        (CASH_PAY, 'Наличными'),
-    ]
-
     pay_method = models.CharField(
         max_length=2,
         choices=PAY_CHOICES,
         default=CASH_PAY,
         db_index=True
     )
-
     restaurant = models.ForeignKey(
         Restaurant,
         related_name='orders',
@@ -209,7 +193,6 @@ class Order(models.Model):
         blank=True,
         null=True
     )
-
     objects = OrderQuerySet.as_manager()
 
     class Meta:
@@ -226,6 +209,7 @@ class Order(models.Model):
             self.status = self.RESTAURANT
         super(Order, self).save(*args, **kargs)
 
+
 class OrderItem(models.Model):
     product = models.ForeignKey(
         Product,
@@ -240,8 +224,13 @@ class OrderItem(models.Model):
         verbose_name='Заказ'
     )
     quantity = models.IntegerField('количество')
-
-    price = models.DecimalField('Цена позиции', max_digits=8, decimal_places=2, validators=[MinValueValidator(0)], default=0)
+    price = models.DecimalField(
+        'Цена позиции',
+        max_digits=8,
+        decimal_places=2,
+        validators=[MinValueValidator(0)],
+        default=0
+    )
 
     class Meta:
         verbose_name = 'пункт меню заказа'
