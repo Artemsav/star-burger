@@ -149,7 +149,8 @@ def view_orders(request):
         for item in item_with_products:
             product_restourants.append(
                 [
-                    rest.restaurant for rest in rest_items if rest.product.name == item.product.name
+                    rest_item.restaurant for rest_item in rest_items \
+                        if rest_item.product.name == item.product.name
                     ]
                 )
         order_result = set(product_restourants[0]).intersection(*product_restourants)
