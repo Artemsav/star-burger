@@ -3,7 +3,7 @@ from django.core.validators import MinValueValidator
 from phonenumber_field.modelfields import PhoneNumberField
 from django.db.models import F, Sum
 from django.utils import timezone
-
+from django.core.validators import MinValueValidator
 
 class Restaurant(models.Model):
     name = models.CharField(
@@ -127,7 +127,12 @@ class RestaurantMenuItem(models.Model):
 
 class OrderQuerySet(models.QuerySet):
     def count_order_price(self):
-        order_items = self.annotate(item_price=Sum(F('order_items__quantity')*F('order_items__product__price'), distinct=True))
+        order_items = self.annotate(
+            item_price=Sum(
+                F('items__quantity')*F('items__product__price'),
+                distinct=True
+            )
+        )
         return order_items
 
 
@@ -207,22 +212,24 @@ class OrderItem(models.Model):
     product = models.ForeignKey(
         Product,
         on_delete=models.CASCADE,
-        related_name='orders',
+        related_name='items',
         verbose_name='продукт'
         )
     order = models.ForeignKey(
         Order,
         on_delete=models.CASCADE,
-        related_name='order_items',
+        related_name='items',
         verbose_name='Заказ'
     )
-    quantity = models.IntegerField('количество')
+    quantity = models.IntegerField(
+        'количество',
+        validators=[MinValueValidator(1)]
+        )
     price = models.DecimalField(
         'Цена позиции',
         max_digits=8,
         decimal_places=2,
         validators=[MinValueValidator(0)],
-        default=0
     )
 
     class Meta:
