@@ -202,13 +202,6 @@ class Order(models.Model):
     def __str__(self):
         return f'{self.firstname} {self.lastname} {self.address}'
 
-    def save(self, *args, **kargs):
-        if self.restaurant is None:
-            self.status = self.MANAGER
-        else:
-            self.status = self.RESTAURANT
-        super(Order, self).save(*args, **kargs)
-
 
 class OrderItem(models.Model):
     product = models.ForeignKey(

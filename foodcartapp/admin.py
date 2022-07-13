@@ -137,11 +137,16 @@ class OrderAdmin(admin.ModelAdmin):
         else:
             return res
 
+    def save_model(self, request, obj, form, change):
+        if obj.restaurant is None:
+            obj.status = obj.MANAGER
+        else:
+            obj.status = obj.RESTAURANT
+        return super().save_model(request, obj, form, change)
+
     def save_formset(self, request: Any, form: Any, formset: Any, change: Any) -> None:
         instances = formset.save(commit=False)
         for instance in instances:
-            print(instance)
             instance.price = instance.quantity * instance.product.price
-            print(instance.price)
             instance.save()
         formset.save_m2m()
