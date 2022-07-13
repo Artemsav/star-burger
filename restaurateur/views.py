@@ -129,13 +129,11 @@ def view_restaurants(request):
 def view_orders(request):
     apikey = settings.YANDEX_GEO
     orders_rests = {}
-    saved_addresses = {}
     orders = list(Order.objects.prefetch_related('items__product').count_order_price())
     rest_items = list(RestaurantMenuItem.objects.select_related('product') \
                     .select_related('restaurant').filter(availability=True))
     address_coordinates = AddressCoordinates.objects.all()
-    for addresses in address_coordinates:
-        saved_addresses[addresses.address]=(addresses.lon, addresses.lat)
+    saved_addresses = {addresses.address: (addresses.lon, addresses.lat) for addresses in address_coordinates}
     for restaurant in rest_items:
         restaurant_address = restaurant.restaurant.address
         if not set([restaurant_address]).issubset(saved_addresses):
@@ -147,14 +145,14 @@ def view_orders(request):
                 )
     for order in orders:
         item_with_products = order.items.all()
-        product_restourant = []
+        product_restourants = []
         for item in item_with_products:
-            product_restourant.append(
+            product_restourants.append(
                 [
                     rest.restaurant for rest in rest_items if rest.product.name == item.product.name
                     ]
                 )
-        order_result = set(product_restourant[0]).intersection(*product_restourant)
+        order_result = set(product_restourants[0]).intersection(*product_restourants)
         order_address = order.address
         if set([order_address]).issubset(saved_addresses.keys()):
             orders_rests[order.id] = sorted(
