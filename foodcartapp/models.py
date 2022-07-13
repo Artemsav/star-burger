@@ -171,7 +171,6 @@ class Order(models.Model):
     )
     comment = models.TextField(
         'Комментарий к заказу',
-        max_length=200,
         blank=True,
         null=True
     )
