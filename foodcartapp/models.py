@@ -160,7 +160,10 @@ class Order(models.Model):
         'Фамилия',
         max_length=50
     )
-    phonenumber = PhoneNumberField(region='RU')
+    phonenumber = PhoneNumberField(
+        'Номер телефона',
+        region='RU'
+    )
     status = models.CharField(
         max_length=4,
         choices=STATUS_CHOICES,
