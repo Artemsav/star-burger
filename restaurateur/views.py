@@ -129,6 +129,7 @@ def view_restaurants(request):
 def view_orders(request):
     apikey = settings.YANDEX_GEO
     orders_rests = {}
+    new_order_addreses = []
     orders = list(Order.objects.prefetch_related('items__product').count_order_price())
     rest_items = list(RestaurantMenuItem.objects.select_related('product') \
                     .select_related('restaurant').filter(availability=True))
@@ -169,22 +170,13 @@ def view_orders(request):
                 )
         else:
             order_lat, order_lon = fetch_coordinates(apikey, order_address)
-            address_coordinates.create(
+            new_order_addreses.append(AddressCoordinates(
                 address=order_address,
                 lat=order_lat,
                 lon=order_lon
-            )
-            orders_rests[order.id] = sorted(
-                [
-                    (
-                        rest.name,
-                        get_distance(
-                                saved_addresses[rest.address],
-                                (order_lat, order_lon)
-                            )
-                        ) for rest in order_result
-                    ], key=lambda rest: rest[1]
-                )
+            ))
+    if new_order_addreses:
+        address_coordinates.bulk_create(new_order_addreses)
     return render(request, template_name='order_items.html', context={
         'orders': orders,
         'order_restaurants': orders_rests,
