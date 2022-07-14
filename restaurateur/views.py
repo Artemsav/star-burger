@@ -133,9 +133,9 @@ def view_orders(request):
     rest_items = list(RestaurantMenuItem.objects.select_related('product') \
                     .select_related('restaurant').filter(availability=True))
     address_coordinates = AddressCoordinates.objects.all()
-    saved_addresses = {addresses.address: (addresses.lon, addresses.lat) for addresses in address_coordinates}
-    for restaurant in rest_items:
-        restaurant_address = restaurant.restaurant.address
+    saved_addresses = {addresses.address: (addresses.lon, addresses.lat) for addresses in address_coordinates}        
+    for rest_item in rest_items:
+        restaurant_address = rest_item.restaurant.address
         if not set([restaurant_address]).issubset(saved_addresses):
             rest_lat, rest_lon = fetch_coordinates(apikey, restaurant_address)
             address_coordinates.create(
@@ -162,12 +162,10 @@ def view_orders(request):
                         rest.name,
                         get_distance(
                             (
-                                saved_addresses.get(rest.address)[0],
-                                saved_addresses.get(rest.address)[1]
+                                coordinates for coordinates in saved_addresses.get(rest.address)                               
                                 ),
                             (
-                                saved_addresses.get(order.address)[0],
-                                saved_addresses.get(order.address)[1]
+                                coordinates for coordinates in saved_addresses.get(order.address)
                                 )
                             )
                         ) for rest in order_result
@@ -186,8 +184,7 @@ def view_orders(request):
                         rest.name,
                         get_distance(
                             (
-                                saved_addresses.get(rest.address)[0],
-                                saved_addresses.get(rest.address)[1]
+                                coordinates for coordinates in saved_addresses.get(rest.address)
                                 ),
                             (
                                 order_lat,
