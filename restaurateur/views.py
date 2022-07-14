@@ -162,10 +162,10 @@ def view_orders(request):
                         rest.name,
                         get_distance(
                             (
-                                coordinates for coordinates in saved_addresses.get(rest.address)                               
+                                coordinates for coordinates in saved_addresses[rest.address]                          
                                 ),
                             (
-                                coordinates for coordinates in saved_addresses.get(order.address)
+                                coordinates for coordinates in saved_addresses[order.address]
                                 )
                             )
                         ) for rest in order_result
@@ -184,7 +184,7 @@ def view_orders(request):
                         rest.name,
                         get_distance(
                             (
-                                coordinates for coordinates in saved_addresses.get(rest.address)
+                                coordinates for coordinates in saved_addresses[rest.address]
                                 ),
                             (
                                 order_lat,
