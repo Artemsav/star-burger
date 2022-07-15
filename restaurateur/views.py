@@ -131,7 +131,9 @@ def view_orders(request):
     orders_rests = {}
     new_order_addreses = []
     orders = sorted(
-        list(Order.objects.prefetch_related('items__product').count_order_price()),
+        list(Order.objects \
+                .prefetch_related('items__product').select_related('restaurant') \
+                .count_order_price()),
         key=lambda order: order.status
         )
     rest_items = list(RestaurantMenuItem.objects.select_related('product') \
