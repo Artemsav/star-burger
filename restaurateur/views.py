@@ -175,6 +175,17 @@ def view_orders(request):
                 lat=order_lat,
                 lon=order_lon
             ))
+            orders_rests[order.id] = sorted(
+                [
+                  (
+                        rest.name,
+                        get_distance(
+                            saved_addresses[rest.address],
+                            (order_lat, order_lon)
+                            )
+                        ) for rest in order_result
+                ], key=lambda rest: rest[1]
+            )
     if new_order_addreses:
         address_coordinates.bulk_create(new_order_addreses)
     return render(request, template_name='order_items.html', context={
