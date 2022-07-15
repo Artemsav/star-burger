@@ -130,7 +130,10 @@ def view_orders(request):
     apikey = settings.YANDEX_GEO
     orders_rests = {}
     new_order_addreses = []
-    orders = list(Order.objects.prefetch_related('items__product').count_order_price())
+    orders = sorted(
+        list(Order.objects.prefetch_related('items__product').count_order_price()),
+        key=lambda order: order.status
+        )
     rest_items = list(RestaurantMenuItem.objects.select_related('product') \
                     .select_related('restaurant').filter(availability=True))
     address_coordinates = AddressCoordinates.objects.all()
@@ -157,17 +160,15 @@ def view_orders(request):
         order_result = set(product_restourants[0]).intersection(*product_restourants)
         order_address = order.address
         if set([order_address]).issubset(saved_addresses.keys()):
-            orders_rests[order.id] = sorted(
-                [
-                    (
-                        rest.name,
-                        get_distance(
-                            saved_addresses[rest.address],
-                            saved_addresses[order.address]
-                            )
-                        ) for rest in order_result
-                    ], key=lambda rest: rest[1]
-                )
+            orders_rests[order.id] = [
+                (
+                    rest.name,
+                    get_distance(
+                        saved_addresses[rest.address],
+                        saved_addresses[order.address]
+                        )
+                    ) for rest in order_result
+                ]
         else:
             order_lat, order_lon = fetch_coordinates(apikey, order_address)
             new_order_addreses.append(AddressCoordinates(
@@ -175,17 +176,15 @@ def view_orders(request):
                 lat=order_lat,
                 lon=order_lon
             ))
-            orders_rests[order.id] = sorted(
-                [
-                  (
-                        rest.name,
-                        get_distance(
-                            saved_addresses[rest.address],
-                            (order_lat, order_lon)
-                            )
-                        ) for rest in order_result
-                ], key=lambda rest: rest[1]
-            )
+            orders_rests[order.id] = [
+                (
+                    rest.name,
+                    get_distance(
+                        saved_addresses[rest.address],
+                        (order_lat, order_lon)
+                        )
+                    ) for rest in order_result
+            ]
     if new_order_addreses:
         address_coordinates.bulk_create(new_order_addreses)
     return render(request, template_name='order_items.html', context={
