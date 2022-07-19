@@ -190,7 +190,7 @@ class Order(models.Model):
         choices=PAY_CHOICES,
         db_index=True
     )
-    restaurant = models.ForeignKey(
+    assigned_restaurant = models.ForeignKey(
         Restaurant,
         related_name='orders',
         verbose_name='ресторан',

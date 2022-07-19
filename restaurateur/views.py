@@ -132,7 +132,7 @@ def view_orders(request):
     new_order_addreses = []
     orders = sorted(
         list(Order.objects \
-                .prefetch_related('items__product').select_related('restaurant') \
+                .prefetch_related('items__product').select_related('assigned_restaurant') \
                 .count_order_price()),
         key=lambda order: order.status
         )

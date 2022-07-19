@@ -121,7 +121,7 @@ class OrderAdmin(admin.ModelAdmin):
         'registered_at',
         'called_at',
         'delivered_at',
-        'restaurant'
+        'assigned_restaurant'
     ]
 
     inlines = [
@@ -138,7 +138,7 @@ class OrderAdmin(admin.ModelAdmin):
             return res
 
     def save_model(self, request, obj, form, change):
-        if obj.restaurant is None:
+        if obj.assigned_restaurant is None:
             obj.status = obj.MANAGER
         else:
             obj.status = obj.RESTAURANT

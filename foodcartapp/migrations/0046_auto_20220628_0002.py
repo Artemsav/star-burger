@@ -16,7 +16,7 @@ def calculate_order_item_price(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('foodcartapp', '0045_auto_20220627_2309'),
+        ('foodcartapp', '0044_alter_orderitem_order'),
     ]
 
     operations = [
