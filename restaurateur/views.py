@@ -160,7 +160,7 @@ def view_orders(request):
                 )
         order_result = set(product_restourants[0]).intersection(*product_restourants)
         order_address = order.address
-        if set([order_address]).issubset(saved_addresses.keys()):
+        if order_address in saved_addresses.keys():
             orders_rests[order.id] = [
                 (
                     rest.name,
