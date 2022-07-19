@@ -138,9 +138,10 @@ def view_orders(request):
     rest_items = list(RestaurantMenuItem.objects.select_related('product') \
                     .select_related('restaurant').filter(availability=True))
     address_coordinates = AddressCoordinates.objects.all()
-    saved_addresses = {addresses.address: (addresses.lon, addresses.lat) for addresses in address_coordinates}        
-    for rest_item in rest_items:
-        restaurant_address = rest_item.restaurant.address
+    saved_addresses = {addresses.address: (addresses.lon, addresses.lat) for addresses in address_coordinates}
+    restaurants = Restaurant.objects.all()
+    for restaurant in restaurants:
+        restaurant_address = restaurant.address
         if not set([restaurant_address]).issubset(saved_addresses):
             rest_lat, rest_lon = fetch_coordinates(apikey, restaurant_address)
             address_coordinates.create(
