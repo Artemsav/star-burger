@@ -130,12 +130,11 @@ def view_orders(request):
     apikey = settings.YANDEX_GEO
     orders_rests = {}
     new_order_addreses = []
-    orders = sorted(
-        list(Order.objects \
-                .prefetch_related('items__product').select_related('assigned_restaurant') \
-                .count_order_price()),
-        key=lambda order: order.status
-        )
+    orders = list(
+        Order.objects \
+            .prefetch_related('items__product').select_related('assigned_restaurant') \
+            .count_order_price().order_by('status')
+                )
     rest_items = list(RestaurantMenuItem.objects.select_related('product') \
                     .select_related('restaurant').filter(availability=True))
     address_coordinates = AddressCoordinates.objects.all()
