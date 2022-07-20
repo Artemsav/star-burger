@@ -142,7 +142,7 @@ def view_orders(request):
     restaurants = Restaurant.objects.all()
     for restaurant in restaurants:
         restaurant_address = restaurant.address
-        if not set([restaurant_address]).issubset(saved_addresses):
+        if restaurant_address not in saved_addresses:
             rest_lat, rest_lon = fetch_coordinates(apikey, restaurant_address)
             address_coordinates.create(
                 address=restaurant_address,
