@@ -133,7 +133,7 @@ def view_orders(request):
     orders = list(
         Order.objects \
             .prefetch_related('items__product').select_related('assigned_restaurant') \
-            .count_order_price().get_available_restaurant().order_by('status')
+            .order_by('status').count_order_price().get_available_restaurant()
                 )
     address_coordinates = AddressCoordinates.objects.all()
     saved_addresses = {addresses.address: (addresses.lon, addresses.lat) for addresses in address_coordinates}
