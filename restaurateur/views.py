@@ -20,8 +20,10 @@ def get_item(dictionary, key):
 
 
 def get_distance(address, restaurant_address):
-    return distance.distance(address, restaurant_address).km
-
+    if address and restaurant_address:
+        return distance.distance(address, restaurant_address).km
+    else:
+        'Ошибка определения дистанции'
 
 def fetch_coordinates(apikey, address):
     base_url = "https://geocode-maps.yandex.ru/1.x"
