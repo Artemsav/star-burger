@@ -151,15 +151,15 @@ def view_orders(request):
                 )
     for order in orders:
         item_with_products = order.items.all()
-        product_restourants = []
+        product_restaurants = []
         for item in item_with_products:
-            product_restourants.append(
+            product_restaurants.append(
                 [
                     rest_item.restaurant for rest_item in rest_items \
                         if rest_item.product.name == item.product.name
                     ]
                 )
-        order_result = set(product_restourants[0]).intersection(*product_restourants)
+        order_result = set(product_restaurants[0]).intersection(*product_restaurants)
         order_address = order.address
         if order_address in saved_addresses.keys():
             orders_rests[order.id] = [
