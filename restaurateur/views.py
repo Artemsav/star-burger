@@ -133,10 +133,8 @@ def view_orders(request):
     orders = list(
         Order.objects \
             .prefetch_related('items__product').select_related('assigned_restaurant') \
-            .count_order_price().order_by('status')
+            .count_order_price().get_available_restaurant().order_by('status')
                 )
-    rest_items = list(RestaurantMenuItem.objects.select_related('product') \
-                    .select_related('restaurant').filter(availability=True))
     address_coordinates = AddressCoordinates.objects.all()
     saved_addresses = {addresses.address: (addresses.lon, addresses.lat) for addresses in address_coordinates}
     restaurants = Restaurant.objects.all()
@@ -150,16 +148,7 @@ def view_orders(request):
                 lon=rest_lon
                 )
     for order in orders:
-        item_with_products = order.items.all()
-        product_restaurants = []
-        for item in item_with_products:
-            product_restaurants.append(
-                [
-                    rest_item.restaurant for rest_item in rest_items \
-                        if rest_item.product.name == item.product.name
-                    ]
-                )
-        order_result = set(product_restaurants[0]).intersection(*product_restaurants)
+        order_available_rest = order.available_rest
         order_address = order.address
         if order_address in saved_addresses.keys():
             orders_rests[order.id] = [
@@ -169,7 +158,7 @@ def view_orders(request):
                         saved_addresses[rest.address],
                         saved_addresses[order.address]
                         )
-                    ) for rest in order_result
+                    ) for rest in order_available_rest
                 ]
         else:
             order_lat, order_lon = fetch_coordinates(apikey, order_address)
