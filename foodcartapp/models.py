@@ -135,6 +135,20 @@ class OrderQuerySet(models.QuerySet):
         )
         return order_items
 
+    def get_available_restaurant(self):
+        #FIX me
+        item_with_products = self.items.all()
+        product_restaurants = []
+        for item in item_with_products:
+            product_restaurants.append(
+                [
+                    rest_item.restaurant for rest_item in rest_items \
+                        if rest_item.product.name == item.product.name
+                    ]
+                )
+        order_result = set(product_restaurants[0]).intersection(*product_restaurants)
+        return order_result
+
 
 class Order(models.Model):
     ELECTRON_PAY = 'EP'
