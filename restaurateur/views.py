@@ -163,7 +163,11 @@ def view_orders(request):
                     ) for rest in order_available_rest
                 ]
         else:
-            order_lat, order_lon = fetch_coordinates(apikey, order_address)
+            try:
+                order_lat, order_lon = fetch_coordinates(apikey, order_address)
+            except TypeError:
+                order_lat = None
+                order_lon = None
             new_order_addreses.append(AddressCoordinates(
                 address=order_address,
                 lat=order_lat,
