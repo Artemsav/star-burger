@@ -137,9 +137,12 @@ def view_orders(request):
             .prefetch_related('items__product').select_related('assigned_restaurant') \
             .order_by('status').count_order_price().get_available_restaurant()
                 )
-    address_coordinates = AddressCoordinates.objects.all()
-    saved_addresses = {addresses.address: (addresses.lon, addresses.lat) for addresses in address_coordinates}
     restaurants = Restaurant.objects.all()
+    orders_addresses = [order.address for order in orders]
+    restaurants_addresses = [restaurant.address for restaurant in restaurants]
+    addresses_for_filter = orders_addresses + restaurants_addresses
+    address_coordinates = AddressCoordinates.objects.filter(address__in=addresses_for_filter)
+    saved_addresses = {addresses.address: (addresses.lon, addresses.lat) for addresses in address_coordinates}
     for restaurant in restaurants:
         restaurant_address = restaurant.address
         if restaurant_address not in saved_addresses:

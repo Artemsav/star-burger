@@ -5,7 +5,6 @@ from .models import Product, Order, OrderItem
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 from rest_framework.serializers import ValidationError
 
@@ -105,6 +104,7 @@ def register_order(request):
             phonenumber=serializer.validated_data['phonenumber']
             )
     order_item_fields = serializer.validated_data['products']
+    print(order_item_fields)
     items = [OrderItem(order=order, **fields) for fields in order_item_fields]
     OrderItem.objects.bulk_create(items)
     if serializer.is_valid:

@@ -8,7 +8,7 @@ from django.utils.encoding import uri_to_iri
 from django.utils.html import format_html
 from django.utils.http import url_has_allowed_host_and_scheme
 
-from .models import (Order, OrderItem, Product, ProductCategory, Restaurant,
+from .models import (Order, OrderItem, Product, Restaurant,
                      RestaurantMenuItem)
 
 
