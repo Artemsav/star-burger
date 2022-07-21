@@ -104,8 +104,11 @@ def register_order(request):
             phonenumber=serializer.validated_data['phonenumber']
             )
     order_item_fields = serializer.validated_data['products']
-    print(order_item_fields)
-    items = [OrderItem(order=order, **fields) for fields in order_item_fields]
+    items = [
+        OrderItem(
+            order=order, **fields, price=fields['quantity']*fields['product'].price
+            ) for fields in order_item_fields
+        ]
     OrderItem.objects.bulk_create(items)
     if serializer.is_valid:
         return Response(serializer.data, status=status.HTTP_200_OK)
