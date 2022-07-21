@@ -47,7 +47,11 @@
           <details>
         <summary> Подробнее</summary>
         {%for rests, distance in order_restaurants|get_item:order.id %}
+        {% if distance%}
         <p>{{rests}}: {{distance|floatformat:2}} км</p>
+        {% else%}
+        <p>Ошибка определения дистанции до адреса</p>
+        {% endif %}
         {% endfor %}</details></td>
         {% endif %}
         <td><a href="{% url 'admin:foodcartapp_order_change' object_id=order.id %}?next={{request.get_full_path|urlencode}}"> Редактирование заказа </a></td>

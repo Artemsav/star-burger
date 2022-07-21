@@ -1,3 +1,4 @@
+from typing import Type
 import requests
 from django import forms
 from django.conf import settings
@@ -9,8 +10,8 @@ from django.template.defaulttags import register
 from django.urls import reverse_lazy
 from django.views import View
 from geopy import distance
-
-from foodcartapp.models import Order, Product, Restaurant, RestaurantMenuItem
+from rest_framework.serializers import ValidationError
+from foodcartapp.models import Order, Product, Restaurant
 from geoapp.models import AddressCoordinates
 
 
@@ -20,10 +21,12 @@ def get_item(dictionary, key):
 
 
 def get_distance(address, restaurant_address):
-    if address and restaurant_address:
+    lan, lot = address
+    if lan > 0 and lot > 0:
         return distance.distance(address, restaurant_address).km
     else:
-        'Ошибка определения дистанции'
+        None
+
 
 def fetch_coordinates(apikey, address):
     base_url = "https://geocode-maps.yandex.ru/1.x"
@@ -146,7 +149,10 @@ def view_orders(request):
     for restaurant in restaurants:
         restaurant_address = restaurant.address
         if restaurant_address not in saved_addresses:
-            rest_lat, rest_lon = fetch_coordinates(apikey, restaurant_address)
+            try:
+                rest_lat, rest_lon = fetch_coordinates(apikey, restaurant_address)
+            except TypeError:
+                raise ValidationError(f'Address of restaurant: {restaurant.name} is not correct')
             address_coordinates.create(
                 address=restaurant_address,
                 lat=rest_lat,
@@ -160,22 +166,21 @@ def view_orders(request):
                 (
                     rest.name,
                     get_distance(
-                        saved_addresses[rest.address],
-                        saved_addresses[order.address]
+                        saved_addresses[order.address],
+                        saved_addresses[rest.address]
                         )
                     ) for rest in order_available_rest
                 ]
         else:
             try:
                 order_lat, order_lon = fetch_coordinates(apikey, order_address)
+
             except TypeError:
-                order_lat = None
-                order_lon = None
+                order_lat, order_lon = -1, -1
             new_order_addreses.append(AddressCoordinates(
                 address=order_address,
                 lat=order_lat,
-                lon=order_lon
-            ))
+                lon=order_lon))
     if new_order_addreses:
         address_coordinates.bulk_create(new_order_addreses)
     return render(request, template_name='order_items.html', context={
