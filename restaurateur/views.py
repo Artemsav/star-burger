@@ -153,7 +153,7 @@ def view_orders(request):
         try:
             rest_lat, rest_lon = fetch_coordinates(apikey, restaurant_address)
         except TypeError:
-            raise ValidationError(f'Address of restaurant: {restaurant.name} is not correct')
+            rest_lat, rest_lon = None, None
         address_coordinates.create(
             address=restaurant_address,
             lat=rest_lat,
@@ -177,7 +177,7 @@ def view_orders(request):
                 order_lat, order_lon = fetch_coordinates(apikey, order_address)
 
             except TypeError:
-                order_lat, order_lon = -1, -1
+                order_lat, order_lon = None, None
             new_order_addreses.append(AddressCoordinates(
                 address=order_address,
                 lat=order_lat,
