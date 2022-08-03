@@ -8,8 +8,8 @@ class AddressCoordinates(models.Model):
         max_length=100,
         unique=True
     )
-    lat = models.FloatField(verbose_name='Широта')
-    lon = models.FloatField(verbose_name='Долгота')
+    lat = models.FloatField(verbose_name='Широта', null=True)
+    lon = models.FloatField(verbose_name='Долгота', null=True)
     registered_at = models.DateTimeField(
         'Зарегистрирован',
         default=timezone.now,
