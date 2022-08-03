@@ -148,16 +148,17 @@ def view_orders(request):
     saved_addresses = {addresses.address: (addresses.lon, addresses.lat) for addresses in address_coordinates}
     for restaurant in restaurants:
         restaurant_address = restaurant.address
-        if restaurant_address not in saved_addresses:
-            try:
-                rest_lat, rest_lon = fetch_coordinates(apikey, restaurant_address)
-            except TypeError:
-                raise ValidationError(f'Address of restaurant: {restaurant.name} is not correct')
-            address_coordinates.create(
-                address=restaurant_address,
-                lat=rest_lat,
-                lon=rest_lon
-                )
+        if restaurant_address in saved_addresses:
+            continue
+        try:
+            rest_lat, rest_lon = fetch_coordinates(apikey, restaurant_address)
+        except TypeError:
+            raise ValidationError(f'Address of restaurant: {restaurant.name} is not correct')
+        address_coordinates.create(
+            address=restaurant_address,
+            lat=rest_lat,
+            lon=rest_lon
+            )
     for order in orders:
         order_available_rest = order.available_rest
         order_address = order.address
