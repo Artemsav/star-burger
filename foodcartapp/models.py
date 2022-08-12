@@ -145,7 +145,7 @@ class OrderQuerySet(models.QuerySet):
                 product_restaurants.append(
                     [
                         rest_item.restaurant for rest_item in rest_items \
-                        if rest_item.product.name == item.product.name
+                        if rest_item.product.id == item.product.id
                         ]
                     )
             order_result = set(product_restaurants[0]).intersection(*product_restaurants)
