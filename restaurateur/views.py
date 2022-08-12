@@ -20,10 +20,10 @@ def get_item(dictionary, key):
     return dictionary.get(key)
 
 
-def get_distance(address, restaurant_address):
-    lan, lot = address
+def get_distance(coordinates, restaurant_address):
+    lan, lot = coordinates
     if lan > 0 and lot > 0:
-        return distance.distance(address, restaurant_address).km
+        return distance.distance(coordinates, restaurant_address).km
     else:
         None
 
