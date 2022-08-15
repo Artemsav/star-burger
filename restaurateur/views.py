@@ -1,4 +1,3 @@
-from typing import Type
 import requests
 from django import forms
 from django.conf import settings
@@ -10,7 +9,6 @@ from django.template.defaulttags import register
 from django.urls import reverse_lazy
 from django.views import View
 from geopy import distance
-from rest_framework.serializers import ValidationError
 from foodcartapp.models import Order, Product, Restaurant
 from geoapp.models import AddressCoordinates
 
@@ -22,10 +20,9 @@ def get_item(dictionary, key):
 
 def get_distance(coordinates, restaurant_coordinates):
     lan, lot = coordinates
-    if lan and lot is not None:
+    restaurant_lan, restaurant_lot = restaurant_coordinates
+    if lan and lot and restaurant_lan and restaurant_lot is not None:
         return distance.distance(coordinates, restaurant_coordinates).km
-    else:
-        None
 
 
 def fetch_coordinates(apikey, address):
