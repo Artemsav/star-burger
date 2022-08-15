@@ -128,16 +128,19 @@ def view_orders(request):
     orders_rests = {}
     new_addresses = []
     orders = list(
-        Order.objects \
-            .prefetch_related('items__product').select_related('assigned_restaurant') \
-            .order_by('status').count_order_price().get_available_restaurant()
-                )
+        Order.objects
+        .prefetch_related('items__product')
+        .select_related('assigned_restaurant')
+        .order_by('status')
+        .count_order_price()
+        .get_available_restaurant()
+        )
     restaurants = Restaurant.objects.all()
-    orders_addresses = [order.address for order in orders]
-    restaurants_addresses = [restaurant.address for restaurant in restaurants]
-    addresses_for_filter = orders_addresses + restaurants_addresses
+    order_addresses = [order.address for order in orders]
+    restaurant_addresses = [restaurant.address for restaurant in restaurants]
+    addresses_for_filter = order_addresses + restaurant_addresses
     address_coordinates = AddressCoordinates.objects.filter(address__in=addresses_for_filter)
-    saved_addresses = {addresses.address: (addresses.lon, addresses.lat) for addresses in address_coordinates}
+    saved_addresses = {address.address: (address.lon, address.lat) for address in address_coordinates}
     for restaurant in restaurants:
         restaurant_address = restaurant.address
         if restaurant_address in saved_addresses:

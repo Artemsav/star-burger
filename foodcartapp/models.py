@@ -3,7 +3,7 @@ from django.core.validators import MinValueValidator
 from phonenumber_field.modelfields import PhoneNumberField
 from django.db.models import F, Sum
 from django.utils import timezone
-from django.core.validators import MinValueValidator
+
 
 class Restaurant(models.Model):
     name = models.CharField(
@@ -136,8 +136,11 @@ class OrderQuerySet(models.QuerySet):
         return order_items
 
     def get_available_restaurant(self):
-        rest_items = list(RestaurantMenuItem.objects.select_related('product') \
-                    .select_related('restaurant').filter(availability=True))
+        rest_items = list(RestaurantMenuItem.objects
+                          .select_related('product')
+                          .select_related('restaurant')
+                          .filter(availability=True)
+                          )
         for order in self:
             item_with_products = order.items.all()
             product_restaurants = []
@@ -226,7 +229,7 @@ class Order(models.Model):
 
 
 class OrderItem(models.Model):
-  
+
     product = models.ForeignKey(
         Product,
         on_delete=models.CASCADE,
