@@ -126,7 +126,7 @@ def view_restaurants(request):
 def view_orders(request):
     apikey = settings.YANDEX_GEO
     orders_rests = {}
-    new_order_addreses = []
+    new_addresses = []
     orders = list(
         Order.objects \
             .prefetch_related('items__product').select_related('assigned_restaurant') \
@@ -170,12 +170,12 @@ def view_orders(request):
 
             except TypeError:
                 order_lat, order_lon = None, None
-            new_order_addreses.append(AddressCoordinates(
+            new_addresses.append(AddressCoordinates(
                 address=order_address,
                 lat=order_lat,
                 lon=order_lon))
-    if new_order_addreses:
-        address_coordinates.bulk_create(new_order_addreses)
+    if new_addresses:
+        address_coordinates.bulk_create(new_addresses)
     return render(request, template_name='order_items.html', context={
         'orders': orders,
         'order_restaurants': orders_rests,
