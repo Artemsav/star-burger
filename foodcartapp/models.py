@@ -137,22 +137,22 @@ class OrderQuerySet(models.QuerySet):
 
     def get_available_restaurant(self):
         restaurant_items = list(RestaurantMenuItem.objects
-                          .select_related('product')
-                          .select_related('restaurant')
-                          .filter(availability=True)
-                          )
+                                .select_related('product')
+                                .select_related('restaurant')
+                                .filter(availability=True)
+                                )
         for order in self:
-            item_with_products = order.items.all()
+            order_items = order.items.all()
             product_restaurants = []
-            for item in item_with_products:
+            for item in order_items:
                 product_restaurants.append(
                     [
-                        rest_item.restaurant for rest_item in restaurant_items \
-                        if rest_item.product.id == item.product.id
+                        restaurant_item.restaurant for restaurant_item in restaurant_items \
+                        if restaurant_item.product.id == item.product.id
                         ]
                     )
             order_result = set(product_restaurants[0]).intersection(*product_restaurants)
-            order.available_rest = order_result
+            order.available_restaurants = order_result
         return self
 
 

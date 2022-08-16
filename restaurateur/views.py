@@ -162,7 +162,7 @@ def view_orders(request):
     if new_addresses:
         address_coordinates.bulk_create(new_addresses)
     for order in orders:
-        order_available_restaurant = order.available_restaurant
+        order_available_restaurants = order.available_restaurants
         order.restaurants = [
             (
                 restaurant.name,
@@ -170,7 +170,7 @@ def view_orders(request):
                     saved_addresses[order.address],
                     saved_addresses[restaurant.address]
                     )
-                ) for restaurant in order_available_restaurant
+                ) for restaurant in order_available_restaurants
             ]
     return render(request, template_name='order_items.html', context={
         'orders': orders,
