@@ -13,11 +13,6 @@ from foodcartapp.models import Order, Product, Restaurant
 from geoapp.models import AddressCoordinates
 
 
-@register.filter
-def get_item(dictionary, key):
-    return dictionary.get(key)
-
-
 def get_distance(coordinates, restaurant_coordinates):
     lan, lot = coordinates
     restaurant_lan, restaurant_lot = restaurant_coordinates
@@ -135,7 +130,6 @@ def view_restaurants(request):
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
     apikey = settings.YANDEX_GEO
-    orders_rests = {}
     new_addresses = []
     orders = list(
         Order.objects
@@ -167,7 +161,7 @@ def view_orders(request):
         address_coordinates.bulk_create(new_addresses)
     for order in orders:
         order_available_rest = order.available_rest
-        orders_rests[order.id] = [
+        order.restaurants = [
             (
                 rest.name,
                 get_distance(
@@ -178,5 +172,4 @@ def view_orders(request):
             ]
     return render(request, template_name='order_items.html', context={
         'orders': orders,
-        'order_restaurants': orders_rests,
     })

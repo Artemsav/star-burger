@@ -40,13 +40,13 @@
         {% else%}
         <td></td>
         {% endif %}
-        {% if order.restaurant%}
-        <td>Готовиться в {{order.restaurant}}</td>
+        {% if order.assigned_restaurant%}
+        <td>Готовиться в {{order.assigned_restaurant}}</td>
         {% else%}
         <td>Может быть приготовленно в:
           <details>
         <summary> Подробнее</summary>
-        {%for rests, distance in order_restaurants|get_item:order.id %}
+        {%for rests, distance in order.restaurants %}
         {% if distance%}
         <p>{{rests}}: {{distance|floatformat:2}} км</p>
         {% else%}
