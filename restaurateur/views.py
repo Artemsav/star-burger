@@ -1,3 +1,5 @@
+from contextlib import suppress
+
 import requests
 from django import forms
 from django.conf import settings
@@ -9,6 +11,7 @@ from django.template.defaulttags import register
 from django.urls import reverse_lazy
 from django.views import View
 from geopy import distance
+from exceptions import CoordinatesNotFound
 from foodcartapp.models import Order, Product, Restaurant
 from geoapp.models import AddressCoordinates
 
@@ -149,10 +152,9 @@ def view_orders(request):
         if adress in saved_addresses.keys():
             continue
         else:
-            try:
+            order_lat, order_lon = None, None
+            with suppress(CoordinatesNotFound):
                 order_lat, order_lon = fetch_coordinates(apikey, adress)
-            except TypeError:
-                order_lat, order_lon = None, None
             new_addresses.append(AddressCoordinates(
                 address=adress,
                 lat=order_lat,
