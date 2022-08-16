@@ -98,7 +98,7 @@ class Product(models.Model):
 class RestaurantMenuItem(models.Model):
     restaurant = models.ForeignKey(
         Restaurant,
-        related_name='rest_items',
+        related_name='restaurant_menu_items',
         verbose_name='ресторан',
         on_delete=models.CASCADE,
     )
@@ -146,12 +146,12 @@ class OrderQuerySet(models.QuerySet):
             product_restaurants = []
             for item in order_items:
                 product_restaurants.append(
-                    [
+                    {
                         restaurant_item.restaurant for restaurant_item in restaurant_items \
                         if restaurant_item.product.id == item.product.id
-                        ]
+                    }
                     )
-            order_result = set(product_restaurants[0]).intersection(*product_restaurants)
+            order_result = product_restaurants[0].intersection(*product_restaurants)
             order.available_restaurants = order_result
         return self
 

@@ -11,7 +11,7 @@ from django.template.defaulttags import register
 from django.urls import reverse_lazy
 from django.views import View
 from geopy import distance
-from exceptions import CoordinatesNotFound
+from restaurateur.exceptions import CoordinatesNotFound
 from foodcartapp.models import Order, Product, Restaurant
 from geoapp.models import AddressCoordinates
 
