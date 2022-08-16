@@ -25,6 +25,16 @@ def get_distance(coordinates, restaurant_coordinates):
         return distance.distance(coordinates, restaurant_coordinates).km
 
 
+def check_address(addresses, saved_addresses):
+    check_result = []
+    for address in addresses:
+        if address in saved_addresses:
+            continue
+        else:
+            check_result.append(address)
+    return check_result
+
+
 def fetch_coordinates(apikey, address):
     base_url = "https://geocode-maps.yandex.ru/1.x"
     response = requests.get(base_url, params={
@@ -138,47 +148,34 @@ def view_orders(request):
     restaurants = Restaurant.objects.all()
     order_addresses = [order.address for order in orders]
     restaurant_addresses = [restaurant.address for restaurant in restaurants]
-    addresses_for_filter = order_addresses + restaurant_addresses
-    address_coordinates = AddressCoordinates.objects.filter(address__in=addresses_for_filter)
+    addresses_to_check = order_addresses + restaurant_addresses
+    address_coordinates = AddressCoordinates.objects.filter(address__in=addresses_to_check)
     saved_addresses = {address.address: (address.lon, address.lat) for address in address_coordinates}
-    for restaurant in restaurants:
-        restaurant_address = restaurant.address
-        if restaurant_address in saved_addresses:
+    for adress in addresses_to_check:
+        if adress in saved_addresses.keys():
             continue
-        try:
-            rest_lat, rest_lon = fetch_coordinates(apikey, restaurant_address)
-        except TypeError:
-            rest_lat, rest_lon = None, None
-        address_coordinates.create(
-            address=restaurant_address,
-            lat=rest_lat,
-            lon=rest_lon
-            )
-    for order in orders:
-        order_available_rest = order.available_rest
-        order_address = order.address
-        if order_address in saved_addresses.keys():
-            orders_rests[order.id] = [
-                (
-                    rest.name,
-                    get_distance(
-                        saved_addresses[order.address],
-                        saved_addresses[rest.address]
-                        )
-                    ) for rest in order_available_rest
-                ]
         else:
             try:
-                order_lat, order_lon = fetch_coordinates(apikey, order_address)
-
+                order_lat, order_lon = fetch_coordinates(apikey, adress)
             except TypeError:
                 order_lat, order_lon = None, None
             new_addresses.append(AddressCoordinates(
-                address=order_address,
+                address=adress,
                 lat=order_lat,
                 lon=order_lon))
     if new_addresses:
         address_coordinates.bulk_create(new_addresses)
+    for order in orders:
+        order_available_rest = order.available_rest
+        orders_rests[order.id] = [
+            (
+                rest.name,
+                get_distance(
+                    saved_addresses[order.address],
+                    saved_addresses[rest.address]
+                    )
+                ) for rest in order_available_rest
+            ]
     return render(request, template_name='order_items.html', context={
         'orders': orders,
         'order_restaurants': orders_rests,
