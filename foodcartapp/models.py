@@ -1,3 +1,5 @@
+from contextlib import suppress
+
 from django.db import models
 from django.core.validators import MinValueValidator
 from phonenumber_field.modelfields import PhoneNumberField
@@ -151,8 +153,10 @@ class OrderQuerySet(models.QuerySet):
                         if restaurant_item.product.id == item.product.id
                     }
                     )
-            order_result = product_restaurants[0].intersection(*product_restaurants)
-            order.available_restaurants = order_result
+            order.available_restaurants = None
+            with suppress(IndexError):
+                order_result = product_restaurants[0].intersection(*product_restaurants)
+                order.available_restaurants = order_result
         return self
 
 
