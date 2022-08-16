@@ -162,15 +162,15 @@ def view_orders(request):
     if new_addresses:
         address_coordinates.bulk_create(new_addresses)
     for order in orders:
-        order_available_rest = order.available_rest
+        order_available_restaurant = order.available_restaurant
         order.restaurants = [
             (
-                rest.name,
+                restaurant.name,
                 get_distance(
                     saved_addresses[order.address],
-                    saved_addresses[rest.address]
+                    saved_addresses[restaurant.address]
                     )
-                ) for rest in order_available_rest
+                ) for restaurant in order_available_restaurant
             ]
     return render(request, template_name='order_items.html', context={
         'orders': orders,

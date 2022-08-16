@@ -136,7 +136,7 @@ class OrderQuerySet(models.QuerySet):
         return order_items
 
     def get_available_restaurant(self):
-        rest_items = list(RestaurantMenuItem.objects
+        restaurant_items = list(RestaurantMenuItem.objects
                           .select_related('product')
                           .select_related('restaurant')
                           .filter(availability=True)
@@ -147,7 +147,7 @@ class OrderQuerySet(models.QuerySet):
             for item in item_with_products:
                 product_restaurants.append(
                     [
-                        rest_item.restaurant for rest_item in rest_items \
+                        rest_item.restaurant for rest_item in restaurant_items \
                         if rest_item.product.id == item.product.id
                         ]
                     )
