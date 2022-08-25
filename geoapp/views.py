@@ -5,7 +5,7 @@ from geopy import distance
 def get_distance(coordinates, restaurant_coordinates):
     lon, lat = coordinates
     restaurant_lan, restaurant_lot = restaurant_coordinates
-    if lon and lat and restaurant_lan and restaurant_lot is not None:
+    if lon and lat and restaurant_lan and restaurant_lot:
         return distance.distance(coordinates, restaurant_coordinates).km
 
 
