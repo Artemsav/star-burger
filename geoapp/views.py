@@ -3,9 +3,9 @@ from geopy import distance
 
 
 def get_distance(coordinates, restaurant_coordinates):
-    lan, lot = coordinates
+    lon, lat = coordinates
     restaurant_lan, restaurant_lot = restaurant_coordinates
-    if lan and lot and restaurant_lan and restaurant_lot is not None:
+    if lon and lat and restaurant_lan and restaurant_lot is not None:
         return distance.distance(coordinates, restaurant_coordinates).km
 
 
