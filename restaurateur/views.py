@@ -111,15 +111,15 @@ def view_orders(request):
     addresses_to_check = order_addresses + restaurant_addresses
     address_coordinates = AddressCoordinates.objects.filter(address__in=addresses_to_check)
     saved_addresses = {address.address: (address.lon, address.lat) for address in address_coordinates}
-    for adress in addresses_to_check:
-        if adress in saved_addresses.keys():
+    for address in addresses_to_check:
+        if address in saved_addresses.keys():
             continue
         else:
             order_lat, order_lon = None, None
             with suppress(CoordinatesNotFound):
-                order_lat, order_lon = fetch_coordinates(apikey, adress)
+                order_lat, order_lon = fetch_coordinates(apikey, address)
             new_addresses.append(AddressCoordinates(
-                address=adress,
+                address=address,
                 lat=order_lat,
                 lon=order_lon))
     if new_addresses:
