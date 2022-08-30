@@ -129,13 +129,13 @@ class RestaurantMenuItem(models.Model):
 
 class OrderQuerySet(models.QuerySet):
     def count_order_price(self):
-        order_price = self.annotate(
+        orders = self.annotate(
             item_price=Sum(
                 F('items__quantity')*F('items__product__price'),
                 distinct=True
             )
         )
-        return order_price
+        return orders
 
     def get_available_restaurant(self):
         restaurant_items = list(RestaurantMenuItem.objects
