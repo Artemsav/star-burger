@@ -9,7 +9,7 @@ env = Env()
 env.read_env()
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
 
 
 SECRET_KEY = env('SECRET_KEY')
@@ -44,6 +44,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'rollbar.contrib.django.middleware.RollbarNotifierMiddlewareExcluding404',
 ]
 
 ROOT_URLCONF = 'star_burger.urls'
@@ -132,3 +133,13 @@ STATICFILES_DIRS = [
 ]
 
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
+
+# ROOLBAR
+
+ROLLBAR = {
+    'access_token': env('TOKEN_ROLLBAR'),
+    'environment': env('ROLLBAR_env'),
+    'code_version': '1.0',
+    'root': BASE_DIR,
+}
+env('SECRET_KEY')
