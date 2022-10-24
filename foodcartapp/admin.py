@@ -9,7 +9,7 @@ from django.utils.html import format_html
 from django.utils.http import url_has_allowed_host_and_scheme
 
 from .models import (Order, OrderItem, Product, Restaurant,
-                     RestaurantMenuItem)
+                     RestaurantMenuItem, ProductCategory)
 
 
 class RestaurantMenuItemInline(admin.TabularInline):
@@ -20,6 +20,11 @@ class RestaurantMenuItemInline(admin.TabularInline):
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
     extra = 0
+
+
+@admin.register(ProductCategory)
+class ProductCategoryAdmin(admin.ModelAdmin):
+    pass
 
 
 @admin.register(Restaurant)

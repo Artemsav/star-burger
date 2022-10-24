@@ -87,9 +87,10 @@ WSGI_APPLICATION = 'star_burger.wsgi.application'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
+DATABASES_SCHEMA = env('DATABASES_SCHEMA')
 DATABASES = {
     'default': dj_database_url.config(
-        default='sqlite:////{0}'.format(os.path.join(BASE_DIR, 'db.sqlite3'))
+        default='postgres://{0}'.format(DATABASES_SCHEMA)
     )
 }
 
@@ -142,4 +143,3 @@ ROLLBAR = {
     'code_version': '1.0',
     'root': BASE_DIR,
 }
-env('SECRET_KEY')
