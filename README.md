@@ -158,6 +158,14 @@ Parcel будет следить за файлами в каталоге `bundle
 - `ALLOWED_HOSTS` — [см. документацию Django](https://docs.djangoproject.com/en/3.1/ref/settings/#allowed-hosts);
 - `YANDEX_GEO` - апи ключ для яндекса, получить можно [здесь](https://developer.tech.yandex.ru/services/). Переменная лежит в настройках проекта `settings.py`
 
+## Конфигурация БД
+
+Для конфегурации БД необходимо следовать [данному](https://www.digitalocean.com/community/tutorials/how-to-use-postgresql-with-your-django-application-on-ubuntu-14-04) туториалу.
+
+Для упаковки настроей доступа в один URL используется библиотека [dj-database-url](https://github.com/jazzband/dj-database-url#id11)
+Необходимо задать следующию переменную окружения:
+`DATABASES_SCHEMA` - USER:PASSWORD@HOST:PORT/NAME
+
 ## Цели проекта
 
 Код написан в учебных целях — это урок в курсе по Python и веб-разработке на сайте [Devman](https://dvmn.org). За основу был взят код проекта [FoodCart](https://github.com/Saibharath79/FoodCart).
