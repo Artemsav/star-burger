@@ -160,11 +160,15 @@ Parcel будет следить за файлами в каталоге `bundle
 
 ## Конфигурация БД
 
-Для конфегурации БД необходимо следовать [данному](https://www.digitalocean.com/community/tutorials/how-to-use-postgresql-with-your-django-application-on-ubuntu-14-04) туториалу.
+Для конфигурации БД необходимо следовать [данному](https://www.digitalocean.com/community/tutorials/how-to-use-postgresql-with-your-django-application-on-ubuntu-14-04) туториалу.
 
-Для упаковки настроей доступа в один URL используется библиотека [dj-database-url](https://github.com/jazzband/dj-database-url#id11)
+Для упаковки настроек доступа в один URL используется библиотека [dj-database-url](https://github.com/jazzband/dj-database-url#id11)
+
 Необходимо задать следующию переменную окружения:
-`DATABASES_SCHEMA` - USER:PASSWORD@HOST:PORT/NAME
+
+
+`DATABASES_SCHEMA` - `USER:PASSWORD@HOST:PORT/NAME`
+
 
 ## Цели проекта
 
