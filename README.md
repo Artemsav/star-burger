@@ -169,6 +169,15 @@ Parcel будет следить за файлами в каталоге `bundle
 
 `DATABASES_SCHEMA` - `USER:PASSWORD@HOST:PORT/NAME`
 
+## Обновление и автодеплой на сервере
+
+Для обновления репо и автоделоя на сервере перейдите в папку `opt` и запустите скрипт
+
+`autodeploy.sh`
+
+По результату должно выдать:
+
+`Deploy is finished. Everything is ok`
 
 ## Цели проекта
 
