@@ -138,8 +138,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static")
 # ROOLBAR
 
 ROLLBAR = {
-    'access_token': env('TOKEN_ROLLBAR'),
-    'environment': env('ROLLBAR_env'),
+    'access_token': env('ROLLBAR_TOKEN'),
+    'environment': env('ROLLBAR_ENV'),
     'code_version': '1.0',
     'root': BASE_DIR,
 }
